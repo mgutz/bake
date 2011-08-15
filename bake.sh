@@ -10,7 +10,7 @@ function upsearch {
   local slashes=${PWD//[^\/]/}
   local directory=$PWD
   for (( n=${#slashes}; n>0; --n )); do
-    test -e $directory/$1 && echo $directory/$1 && return
+    test -e $directory/$1 && echo $directory && return
     directory=$directory/..
   done
 }
@@ -34,11 +34,15 @@ function invoke {
     fi
 }
 
-
-bakefile=`upsearch Bakefile`
+dirname=`upsearch Bakefile`
+bakefile=$dirname/Bakefile
 if [ "_$1" == "_" ]; then
   help $bakefile
 else
   source $bakefile
+
+  # ensure working directory is from Bakefile
+  pushd $dirname >/dev/null
   "$@"
+  popd > /dev/null
 fi

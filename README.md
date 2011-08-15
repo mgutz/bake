@@ -7,11 +7,10 @@ Simple make utility for bash
 
     npm install bake
 
-or
+Or,
 
     git clone https://github.com/mgutz/bake
-    cd bake
-    npm link
+    sudo ln -sf `pwd`/bake/bake.sh /usr/local/bin/bake
 
 ## Usage
 
@@ -23,6 +22,13 @@ Run a task
 
     bake <task>
 
+## Rules
+
+* `bake` searches the current and parent directories for a  `Bakefile` to run.
+* Tasks are functions.
+* A comment on the same line of the function displays in the task list.
+* Use `invoke` to invoke a task only once.
+* Functions prefixed with underscore `_` are not displayed in task list.
 
 ## Example
 
@@ -45,10 +51,3 @@ Example Bakefile
 
 
 
-Tasks are simply functions.
-
-A comment on the same line of the function displays in the task list.
-
-Use `invoke` to invoke a task only once.
-
-Functions prefixed with underscore `_` are not displayed in task list.

@@ -1,3 +1,5 @@
+# This is an example Bakefile
+
 function _private {         # underscored functions do not display on task list
     echo in private
 }
@@ -12,3 +14,6 @@ function build {            # builds the project
     invoke "clean"
     echo building ...
 }
+
+
+# vim:filetype=sh:
