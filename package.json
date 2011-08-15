@@ -1,0 +1,17 @@
+{
+  "author": "Mario Gutierrez <mario@mgutz.com>",
+  "name": "bake",
+  "description": "Stop using Makefile as a fancy bash script",
+  "version": "0.0.0",
+  "repository": {
+    "url": ""
+  },
+  "engines": {
+    "node": "~v0.4.10"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "bin": {
+    "bake": "./bake.sh"
+  }
+}
