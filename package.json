@@ -1,6 +1,6 @@
 {
   "author": "Mario Gutierrez <mario@mgutz.com>",
-  "name": "bake",
+  "name": "bake-bash",
   "description": "Simple bash make utility",
   "version": "0.1.0",
   "repository": {
