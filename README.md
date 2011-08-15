@@ -1,13 +1,17 @@
 # Bake
 
-Simple make utility using bash
+Simple make utility for bash
 
-Many of the makefiles for node.js projects seem to be nothing more
-than runners for bash. `bake` lets you manage simple projects with bash.
 
 ## Installation
 
     npm install bake
+
+or
+
+    git clone https://github.com/mgutz/bake
+    cd bake
+    npm link
 
 ## Usage
 
@@ -24,16 +28,27 @@ Run a task
 
 Example Bakefile
 
-    function clean {            # Clean the project
-        echo cleaning ...
+    function _private {         # underscored functions do not display
+        echo in private
     }
 
+    function clean {            # cleans the project
+        echo cleaning ...
+        _private
+    }
 
-    function build {            # Build the project
+    function build {            # builds the project
         # invokes clean only once
-        invoke "clean"
         invoke "clean"
         echo building ...
     }
 
-Function should have a comment on the same line.
+
+
+Tasks are simply functions.
+
+A comment on the same line of the function displays in the task list.
+
+Use `invoke` to invoke a task only once.
+
+Functions prefixed with underscore `_` are not displayed in task list.

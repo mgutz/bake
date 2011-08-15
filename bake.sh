@@ -18,7 +18,7 @@ function upsearch {
 
 # Prints help
 function help {
-    grep "^function" $1 | sed "s/function \([a-z]*\)[^#]*\(.*\)/\1 \2/g"
+    grep "^function [^_]" $1 | sed "s/function \([a-z]*\)[^#]*\(.*\)/\1 \2/g"
 }
 
 

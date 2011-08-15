@@ -1,9 +1,14 @@
+function _private {         # underscored functions do not display on task list
+    echo in private
+}
+
 function clean {            # cleans the project
-  echo cleaning ...
+    echo cleaning ...
+    _private
 }
 
 function build {            # builds the project
-  # invokes clean only once
-  invoke clean
-  echo building ...
+    # invokes clean only once
+    invoke "clean"
+    echo building ...
 }
