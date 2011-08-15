@@ -5,7 +5,7 @@ Simple make utility for bash
 
 ## Installation
 
-    npm install bake
+    npm install bake-bash
 
 Or,
 
@@ -27,8 +27,8 @@ Run a task
 * `bake` searches the current and parent directories for a  `Bakefile` to run.
 * Tasks are functions.
 * A comment on the same line of the function displays in the task list.
+* Prefix private functions ith underscore `_`. These are not displayed in task list.
 * Use `invoke` to invoke a task only once.
-* Functions prefixed with underscore `_` are not displayed in task list.
 
 ## Example
 
