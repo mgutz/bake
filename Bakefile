@@ -1,0 +1,9 @@
+function clean {            # cleans the project
+  echo cleaning ...
+}
+
+function build {            # builds the project
+  # invokes clean only once
+  invoke clean
+  echo building ...
+}
