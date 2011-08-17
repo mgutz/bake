@@ -27,7 +27,7 @@ Run a task
 * `bake` searches the current and parent directories for a  `Bakefile` to run.
 * Tasks are functions.
 * A comment on the same line of the function displays in the task list.
-* Prefix private functions ith underscore `_`. These are not displayed in task list.
+* Prefix private functions with underscore `_`. These are not displayed in task list.
 * Use `invoke` to invoke a task only once.
 
 ## Example
