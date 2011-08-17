@@ -1,6 +1,6 @@
 # Bake
 
-Simple make utility for bash
+Simple make-like utility for bash
 
 
 ## Installation
@@ -34,16 +34,16 @@ Run a task
 
 Example Bakefile
 
-    function _private {         # underscored functions do not display
+    _private () {         # underscored functions do not display in task list
         echo in private
     }
 
-    function clean {            # cleans the project
+    clean () {            # cleans the project
         echo cleaning ...
         _private
     }
 
-    function build {            # builds the project
+    build () {            # builds the project
         # invokes clean only once
         invoke "clean"
         echo building ...

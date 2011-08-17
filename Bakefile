@@ -10,7 +10,7 @@ build () {            # builds the project
     echo building ...
 }
 
-clean (){
+clean () {
     echo cleaning ...
     _private
 }
