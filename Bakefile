@@ -1,19 +1,27 @@
 # This is an example Bakefile
 
-_private () {         # underscored functions do not display on task list
+_private() {         # underscored functions do not display on task list
     echo in private
 }
 
-build () {            # builds the project
-    # invokes clean only once
+
+build() {            # builds the project
+    # invokes a function once, otherwise call the function directly
     invoke "clean"
     echo building ...
 }
 
-clean () {
+
+clean() {
     echo cleaning ...
     _private
 }
 
+
+coffeescripts() {    # compiles coffee scripts
+    outdated build src || return 0
+    coffee -c -o build src
+    bake_ok "coffee" "compiled"
+}
 
 # vim:filetype=sh:

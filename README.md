@@ -30,24 +30,53 @@ Run a task
 * Prefix private functions with underscore `_`. These are not displayed in task list.
 * Use `invoke` to invoke a task only once.
 
+
+## Functions
+
+Prints a plain message
+`bake_log <action> <description>`
+
+Prints a red error message
+`bake_error <action> <description>`
+
+Prints a green ok message
+`bake_ok <action> <descsription>`
+
+Prints a cyan info message
+`bake_info <action> <description>`
+
+Determines if target is older than reference. Returns 1 if outdated.
+`outdated <target> <reference>`
+
+    outdated build src || return 1          # skip rest of task
+    outdated build src && invoke compile    # compile if outdated
+
+
+
 ## Example
 
 Example Bakefile
 
-    _private () {         # underscored functions do not display in task list
+    _private() {         # underscored functions do not display in task list
         echo in private
     }
 
-    clean () {            # cleans the project
+
+    clean() {            # cleans the project
         echo cleaning ...
         _private
     }
 
-    build () {            # builds the project
-        # invokes clean only once
+
+    build() {            # builds the project
+        # invokes a function once, otherwise call function directly
         invoke "clean"
         echo building ...
     }
 
 
-
+    coffeescripts() {    # compiles coffee scripts
+        outdated build src || return 0
+        coffee -c -o build src
+        bake_ok "coffee" "compiled"
+    }
