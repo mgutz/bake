@@ -1,6 +1,8 @@
 # Bake
 
-Simple make-like utility for bash
+Simple build/command utility for bash.
+
+Tired of being a PHONY.
 
 
 ## Installation
@@ -12,7 +14,7 @@ Or,
     git clone https://github.com/mgutz/bake
     sudo ln -sf `pwd`/bake/bake.sh /usr/local/bin/bake
 
-## Usage
+# Usage
 
 Display tasks
 
