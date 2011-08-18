@@ -75,6 +75,7 @@ C_ON_IPURPLE='\033[10;95m'  # Purple
 C_ON_ICYAN='\033[0;106m'    # Cyan
 C_ON_IWHITE='\033[0;107m'   # White
 
+
 # Finds the directory containing a file.
 #
 # @param $1 The filename.
@@ -112,7 +113,7 @@ invoke () {
     fi
 }
 
-# Logs a statement with ansi colors.
+# Prints a log message with no color.
 #
 # @example
 #   bake_log "coffeescript" "compiling" "src/foo/test.coffee"
@@ -120,11 +121,11 @@ invoke () {
 # @param $1 Action
 # @param $2 Description
 bake_log () {
-    echo -e "      $1\t${2}${C_OFF}"
+    echo -e "      $1\t${2}"
 }
 
 
-# Prints an error line.
+# Prints an error message.
 #
 # @param $1 action
 # @param $2 description
@@ -142,7 +143,7 @@ bake_info () {
 }
 
 
-# Prints an ok line.
+# Prints an ok message.
 #
 # @param $1 action
 # @param $2 description
@@ -151,7 +152,7 @@ bake_ok () {
 }
 
 
-# Determines if files or directories are outdated
+# Determines if target file is outdated (older than) reference.
 #
 # @param $1 target
 # @param $2 reference
@@ -176,6 +177,7 @@ outdated() {
 upsearch Bakefile
 bakefile_dir=$bake_result
 bakefile=$bakefile_dir/Bakefile
+
 if [ -f $bakefile ]; then
     if [ "_$1" == "_" ]; then
       task_list $bakefile
@@ -191,5 +193,4 @@ else
     echo Bakefile not found in current or parent directories.
     exit 1
 fi
-unset dirname
 unset bakefile
