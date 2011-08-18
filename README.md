@@ -32,22 +32,42 @@ Run a task
 
 ## Functions
 
-`bake_error <action> <description>` Prints a red error message.
-    bake_error "compiling" "src/lib/test.coffee"
+Prints a red error message.
 
-`bake_log <action> <description>` Prints a plain message.
-    bake_log "bake" "Processing bakefile..."
+    bake_error <action> <description>
 
-`bake_ok <action> <descsription>` Prints a green ok message.
-    bake_ok "compiling" "compiled src/lib/test.js"
+    example: bake_error "compiling" "src/lib/test.coffee"
 
-`bake_info <action> <description>` Prints a cyan info message.
-    bake_info "bake" "built project in 700ms"
+Prints a plain message.
 
-`invoke <function_name>` Invokes a task only once.
-    invoke "clean"
+    bake_log <action> <description>
 
-`outdated <target> <reference>` Determines if target is older than reference, returning 1 if outdated.
+    example: bake_log "bake" "Processing bakefile..."
+
+Prints a green ok message.
+
+    bake_ok <action> <descsription>
+
+    example: bake_ok "compiling" "compiled src/lib/test.js"
+
+Prints a cyan info message.
+
+    bake_info <action> <description>
+
+    example: bake_info "bake" "built project in 700ms"
+
+Invokes a task only once.
+
+    invoke <function_name>
+
+    example: invoke "clean"
+
+Determines if target is older than reference, returning 1 if outdated.
+
+    outdated <target> <reference>
+
+    examples:
+
     outdated build src || return 1          # skip rest of task
     outdated build src && invoke compile    # compile if outdated
 
