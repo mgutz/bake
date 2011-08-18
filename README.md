@@ -25,10 +25,9 @@ Run a task
 ## Rules
 
 * `bake` searches the current and parent directories for a `Bakefile` to run.
-* Tasks are functions.
+* Tasks are defined as a normal function using the keyword `function some_task`
 * A comment on the same line of the function displays in the task list.
-* Prefix private functions with underscore `_`. These are not displayed in task list.
-
+* Private functions are declared with `some_function ()`. These are not displayed in task list.
 
 ## Functions
 
@@ -76,25 +75,26 @@ Determines if target is older than reference, returning 1 if outdated.
 
 Example Bakefile
 
-    _private() {         # underscored functions do not display in task list
+    # Private functions use the alternate form of function declaration.
+    private() {
         echo in private
     }
 
 
-    clean() {            # cleans the project
+    function clean {            # cleans the project
         echo cleaning ...
         _private
     }
 
 
-    build() {            # builds the project
+    function build {            # builds the project
         # invokes a function once, otherwise call function directly
         invoke "clean"
         echo building ...
     }
 
 
-    coffeescripts() {    # compiles coffee scripts
+    function coffeescripts {    # compiles coffee scripts
         outdated build src || return 0
         coffee -c -o build src
         bake_ok "coffee" "compiled"
