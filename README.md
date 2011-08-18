@@ -24,33 +24,32 @@ Run a task
 
 ## Rules
 
-* `bake` searches the current and parent directories for a  `Bakefile` to run.
+* `bake` searches the current and parent directories for a `Bakefile` to run.
 * Tasks are functions.
 * A comment on the same line of the function displays in the task list.
 * Prefix private functions with underscore `_`. These are not displayed in task list.
-* Use `invoke` to invoke a task only once.
 
 
 ## Functions
 
-Prints a plain message
-`bake_log <action> <description>`
+`bake_error <action> <description>` Prints a red error message.
+    bake_error "compiling" "src/lib/test.coffee"
 
-Prints a red error message
-`bake_error <action> <description>`
+`bake_log <action> <description>` Prints a plain message.
+    bake_log "bake" "Processing bakefile..."
 
-Prints a green ok message
-`bake_ok <action> <descsription>`
+`bake_ok <action> <descsription>` Prints a green ok message.
+    bake_ok "compiling" "compiled src/lib/test.js"
 
-Prints a cyan info message
-`bake_info <action> <description>`
+`bake_info <action> <description>` Prints a cyan info message.
+    bake_info "bake" "built project in 700ms"
 
-Determines if target is older than reference. Returns 1 if outdated.
-`outdated <target> <reference>`
+`invoke <function_name>` Invokes a task only once.
+    invoke "clean"
 
+`outdated <target> <reference>` Determines if target is older than reference, returning 1 if outdated.
     outdated build src || return 1          # skip rest of task
     outdated build src && invoke compile    # compile if outdated
-
 
 
 ## Example
