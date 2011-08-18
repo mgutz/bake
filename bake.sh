@@ -174,23 +174,30 @@ outdated() {
 }
 
 
-upsearch Bakefile
-bakefile_dir=$bake_result
-bakefile=$bakefile_dir/Bakefile
+# Main entry point into program.
+main() {
+    upsearch Bakefile
+    bakefile_dir=$bake_result
+    bakefile=$bakefile_dir/Bakefile
 
-if [ -f $bakefile ]; then
-    if [ "_$1" == "_" ]; then
-      task_list $bakefile
+    if [ -f $bakefile ]; then
+        if [ "_$1" == "_" ]; then
+          task_list $bakefile
+        else
+          source $bakefile
+
+          # ensure working directory is from Bakefile
+          pushd $bakefile_dir >/dev/null
+          "$@"
+          popd > /dev/null
+        fi
     else
-      source $bakefile
-
-      # ensure working directory is from Bakefile
-      pushd $bakefile_dir >/dev/null
-      "$@"
-      popd > /dev/null
+        echo Bakefile not found in current or parent directories.
+        exit 1
     fi
-else
-    echo Bakefile not found in current or parent directories.
-    exit 1
-fi
-unset bakefile
+    unset bakefile
+}
+
+
+
+main $@

@@ -69,7 +69,7 @@ Determines if target is older than reference, returning 1 if outdated.
     examples:
 
     outdated build src || return 1          # skip rest of task
-    outdated build src && invoke compile    # compile if outdated
+    outdated build src && invoke "compile"  # compile if outdated
 
 
 ## Example
