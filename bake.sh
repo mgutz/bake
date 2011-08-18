@@ -101,7 +101,7 @@ task_list () {
 }
 
 
-# Invokes function once
+# Invokes function once.
 #
 # @param $1 Function to invoke.
 invoke () {
@@ -109,7 +109,7 @@ invoke () {
     eval "invoked=\$$1_invoked"
     if [ ! "$invoked" == "1" ]; then
         eval $1_invoked=1
-        eval $1
+        "$@"
     fi
 }
 
