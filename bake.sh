@@ -18,7 +18,7 @@ upsearch () {
 
 # Prints help
 task_list () {
-    grep "^[^_]\w\+ *().*" $1  | sed "s/() *{/    /g"
+    grep "^[^_]\w\+ *().*" $1  | sed "s/[(){]/ /g"
     #grep "^function [^_]" $1 | sed "s/function \([a-zA-Z0-9_]*[^{]*\){*\(.*\)/\1 \2/g"
 }
 
@@ -52,16 +52,23 @@ bake_error () {
     echo TBD
 }
 
-
 dirname=`upsearch Bakefile`
 bakefile=$dirname/Bakefile
-if [ "_$1" == "_" ]; then
-  task_list $bakefile
-else
-  source $bakefile
+if [ -f $bakefile ]; then
+    if [ "_$1" == "_" ]; then
+      task_list $bakefile
+    else
+      source $bakefile
 
-  # ensure working directory is from Bakefile
-  pushd $dirname >/dev/null
-  "$@"
-  popd > /dev/null
+      # ensure working directory is from Bakefile
+      pushd $dirname >/dev/null
+      "$@"
+      popd > /dev/null
+    fi
+else
+    echo Bakefile not found in current or parent directories.
+    exit 1
 fi
+
+unset dirname
+unset bakefile
