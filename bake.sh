@@ -177,25 +177,33 @@ outdated() {
 # Main entry point into program.
 main() {
     upsearch Bakefile
-    bakefile_dir=$bake_result
-    bakefile=$bakefile_dir/Bakefile
+    local bakefile_dir=$bake_result
+    local bakefile=$bakefile_dir/Bakefile
+    local fn
 
     if [ -f $bakefile ]; then
         if [ "_$1" == "_" ]; then
-          task_list $bakefile
+            task_list $bakefile
         else
-          source $bakefile
+            source $bakefile
 
-          # ensure working directory is from Bakefile
-          pushd $bakefile_dir >/dev/null
-          "$@"
-          popd > /dev/null
+            # ensure working directory is from Bakefile
+            pushd $bakefile_dir >/dev/null
+
+            if [[ $(type -t $1) == "function" ]]; then
+                "$@"
+            elif [[ $(type -t on_command_not_found) == "function" ]]; then
+                on_command_not_found $@
+                [[ $? -eq 1 ]] && task_list $bakefile
+            else
+                task_list $bakefile
+            fi
+            popd > /dev/null
         fi
     else
         echo Bakefile not found in current or parent directories.
         exit 1
     fi
-    unset bakefile
 }
 
 

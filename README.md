@@ -73,6 +73,15 @@ Determines if target is older than reference, returning 1 if outdated.
     outdated build src && invoke "compile"  # compile if outdated
 
 
+Run a function when command is not found. Add a function like
+
+    on_invalid_command () {
+        [[ -f test/$1.js ]] && nodeunit test/$1.js && return 0
+        return 1
+    }
+
+
+
 ## Example
 
 Example Bakefile

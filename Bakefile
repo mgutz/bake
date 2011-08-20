@@ -5,20 +5,20 @@ _private() {         # underscored functions do not display on task list
 }
 
 
-build() {            # builds the project
+function build {            # builds the project
     # invokes a function once, otherwise call the function directly
     invoke "clean"
     echo building ...
 }
 
 
-clean() {
+function clean {
     echo cleaning ...
     _private
 }
 
 
-coffeescripts() {    # compiles coffee scripts
+function coffeescripts {    # compiles coffee scripts
     outdated build src || return 0
     coffee -c -o build src
     bake_ok "coffee" "compiled"
