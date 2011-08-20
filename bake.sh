@@ -76,6 +76,27 @@ C_ON_ICYAN='\033[0;106m'    # Cyan
 C_ON_IWHITE='\033[0;107m'   # White
 
 
+relativize() {
+    source=$1
+    target=$2
+
+
+    echo $source
+    echo $target
+
+
+    common_part=$source
+    back=
+    while [ "${target#$common_part}" = "${target}" ]; do
+      common_part=$(dirname $common_part)
+      back="../${back}"
+    done
+
+    echo ${back}${target#$common_part/}
+}
+
+
+
 # Finds the directory containing a file.
 #
 # @param $1 The filename.
@@ -92,12 +113,14 @@ upsearch () {
 }
 
 
-# Prints task list.
+# Prints task list. Only those functions that are declared as "fuction name" are considered tasks.
 #
 # @param $1 Bakefile
 task_list () {
     #grep "^[^_]\w\+ *().*" $1  | sed "s/[(){]/ /g"
-    grep "^function [^_]" $1 | sed "s/function \([a-zA-Z0-9_]*[^{]*\){*\(.*\)/\1 \2/g"
+    echo "usage: bake <task>"
+    echo ""
+    grep "^function [^_]" $1 | sed "s/function \([a-zA-Z0-9_]*[^{]*\){*\(.*\)/\1 \2/g" | sort
 }
 
 
