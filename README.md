@@ -1,6 +1,6 @@
 # Bake
 
-Simple Bash build/project utility for bash in the style of rake.
+Simple Bash build/project utility in the style of rake.
 
 Not trying to reinvent wheel. Most node project Makefiles are just
 Bash scripts.
@@ -54,6 +54,10 @@ Run task
     }
 
 
+    function on_task_not_found {
+        echo "Task not found $1"
+    }
+
 ## Rules
 
 * `bake` searches the current and parent directories for a `Bakefile` to run.
@@ -104,9 +108,10 @@ Determines if target is older than reference, returning 1 if outdated.
     outdated build src && invoke "compile"  # compile if outdated
 
 
-Run a dynamic task when task `$1` is not found. Add a function like
+Run a dynamic task when task `$1` is not found. For example, to run
+a test as the first argument to `bake`, add this to `Bakefile`
 
-    function on_invalid_command {
-        [[ -f test/$1.js ]] && nodeunit test/$1.js && return 0
+    function on_task_not_found {
+        [[ -f test/$1.js ]] && mocha test/$1.js && return 0
         return 1
     }

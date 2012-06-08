@@ -25,4 +25,9 @@ function coffee {
     bake_ok "coffe" "compiled"
 }
 
+
+function on_task_not_found {
+    echo "Task not found $1"
+}
+
 # vim:filetype=sh:

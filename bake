@@ -226,8 +226,8 @@ main() {
             pushd $bakefile_dir >/dev/null
             if [[ $(type -t $1) == "function" ]]; then
                 "$@"
-            elif [[ $(type -t on_command_not_found) == "function" ]]; then
-                on_command_not_found $@
+            elif [[ $(type -t on_task_not_found) == "function" ]]; then
+                on_task_not_found $@
                 [[ $? -eq 1 ]] && task_list $bakefile
             else
                 task_list $bakefile
