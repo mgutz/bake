@@ -1,27 +1,28 @@
-# This is an example Bakefile
-
-_private() {         # underscored functions do not display on task list
+function private {
     echo in private
 }
 
 
-function build {            # builds the project
-    # invokes a function once, otherwise call the function directly
-    invoke "clean"
-    echo building ...
+#. Builds the project
+function build {
+    # ensures clean is called only once
+    invoke clean
+    bake_ok building ...
 }
 
 
+#. Cleans the project
 function clean {
-    echo cleaning ...
-    _private
+    bake_ok "cleaning ..."
+    private
 }
 
 
-function coffeescripts {    # compiles coffee scripts
+#. Compiles coffee scripts
+function coffee {
     outdated build src || return 0
     coffee -c -o build src
-    bake_ok "coffee" "compiled"
+    bake_ok "coffe" "compiled"
 }
 
 # vim:filetype=sh:

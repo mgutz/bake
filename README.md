@@ -1,18 +1,15 @@
 # Bake
 
-Simple build/command utility for bash.
+Simple Bash build/project utility for bash in the style of rake.
 
-Tired of being a PHONY.
+Not trying to reinvent wheel. Most node project Makefiles are just
+Bash scripts.
 
 
 ## Installation
 
     npm install bake-bash
 
-Or,
-
-    git clone https://github.com/mgutz/bake
-    sudo ln -sf `pwd`/bake/bake.sh /usr/local/bin/bake
 
 # Usage
 
@@ -20,16 +17,50 @@ Display tasks
 
     bake
 
-Run a task
+Run task
 
     bake <task>
+
+
+## Example Bakefile
+
+    PATH=node_modules/coffee-script/bin:$PATH
+
+    function private {
+        echo in private
+    }
+
+
+    #. Builds the project
+    function build {
+        # ensures clean is called only once
+        invoke clean
+        bake_ok building ...
+    }
+
+
+    #. Cleans the project
+    function clean {
+        bake_ok "cleaning ..."
+        private
+    }
+
+
+    #. Compiles coffee scripts
+    function coffee {
+        outdated build src || return 0
+        coffee -c -o build src
+        bake_ok "coffe" "compiled"
+    }
+
 
 ## Rules
 
 * `bake` searches the current and parent directories for a `Bakefile` to run.
-* Tasks are defined as a normal function using the keyword `function some_task`
-* A comment on the same line of the function displays in the task list.
-* Private functions are declared with `some_function ()`. These are not displayed in task list.
+* Tasks are defined as normal Bash functions.
+* A task description is simply a comment that starts with `#.` and precedes
+  a function.
+
 
 ## Functions
 
@@ -73,40 +104,9 @@ Determines if target is older than reference, returning 1 if outdated.
     outdated build src && invoke "compile"  # compile if outdated
 
 
-Run a function when command is not found. Add a function like
+Run a dynamic task when task `$1` is not found. Add a function like
 
-    on_invalid_command () {
+    function on_invalid_command {
         [[ -f test/$1.js ]] && nodeunit test/$1.js && return 0
         return 1
-    }
-
-
-
-## Example
-
-Example Bakefile
-
-    # Private functions use the alternate form of function declaration.
-    private() {
-        echo in private
-    }
-
-
-    function clean {            # cleans the project
-        echo cleaning ...
-        _private
-    }
-
-
-    function build {            # builds the project
-        # invokes a function once, otherwise call function directly
-        invoke "clean"
-        echo building ...
-    }
-
-
-    function coffeescripts {    # compiles coffee scripts
-        outdated build src || return 0
-        coffee -c -o build src
-        bake_ok "coffee" "compiled"
     }

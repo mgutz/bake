@@ -3,7 +3,7 @@
 # Credit: https://wiki.archlinux.org/index.php/Color_Bash_Prompt
 
 # Reset
-C_OFF='\033[0m'       # Text Reset
+C_OFF='\033[0m'             # Text Reset
 
 # Regular Colors
 C_BLACK='\033[0;30m'        # Black
@@ -76,27 +76,6 @@ C_ON_ICYAN='\033[0;106m'    # Cyan
 C_ON_IWHITE='\033[0;107m'   # White
 
 
-relativize() {
-    source=$1
-    target=$2
-
-
-    echo $source
-    echo $target
-
-
-    common_part=$source
-    back=
-    while [ "${target#$common_part}" = "${target}" ]; do
-      common_part=$(dirname $common_part)
-      back="../${back}"
-    done
-
-    echo ${back}${target#$common_part/}
-}
-
-
-
 # Finds the directory containing a file.
 #
 # @param $1 The filename.
@@ -113,14 +92,35 @@ upsearch () {
 }
 
 
-# Prints task list. Only those functions that are declared as "fuction name" are considered tasks.
+# Prints task list. Tasks are marked by preceding a function with a comment
+# that starts with `# @task`
+#
+# Example:
+#   # @task Build the project
+#   task() { }
 #
 # @param $1 Bakefile
 task_list () {
-    #grep "^[^_]\w\+ *().*" $1  | sed "s/[(){]/ /g"
-    echo "usage: bake <task>"
-    echo ""
-    grep "^function [^_]" $1 | sed "s/function \([a-zA-Z0-9_]*[^{]*\){*\(.*\)/\1 \2/g" | sort
+
+    # awk on OS X does not have gensub so using Perl which is installed
+    # almost everywhere
+    read -r -d '' task_script <<'SCRIPT'
+    # search for task description
+    if (s/^#\. (\w.*)$/\1/) {
+        $desc = $1;
+        $func = <>;
+
+        # search for task name in this format "function task_name" or
+        # "task_name ()"
+        if (!($func =~ s/^.*function (\w+).*$/\1/)) {
+            $func =~ s/^(\w+).*\(\).*$/\1/;
+        }
+        chomp($func);
+        printf "%-16s $desc\n", $func;
+    }
+SCRIPT
+    perl -ne "$task_script" $1 | sort
+    [[ $(type -t on_task_list) == "function" ]] && on_task_list
 }
 
 
@@ -129,11 +129,13 @@ task_list () {
 # @param $1 Function to invoke.
 invoke () {
     local invoked
-    eval "invoked=\$$1_invoked"
-    if [ ! "$invoked" == "1" ]; then
-        eval $1_invoked=1
-        "$@"
-    fi
+    for f in "$@"; do
+        eval "invoked=\$$1_invoked"
+        if [ ! "$invoked" == "1" ]; then
+            eval $1_invoked=1
+            "$@"
+        fi
+    done
 }
 
 # Prints a log message with no color.
@@ -175,6 +177,16 @@ bake_ok () {
 }
 
 
+# Exits the sript and prints our a message.
+#
+# @param $1 Exit code.
+# @param $2 [optional] Message.
+bake_exit() {
+    [[ -n $2 ]] && echo $2
+    exit $1
+}
+
+
 # Determines if target file is outdated (older than) reference.
 #
 # @param $1 target
@@ -199,20 +211,19 @@ outdated() {
 
 # Main entry point into program.
 main() {
-    upsearch Bakefile
-    local bakefile_dir=$bake_result
-    local bakefile=$bakefile_dir/Bakefile
-    local fn
+    if [ "$bakefile" == "" ]; then
+        upsearch Bakefile
+        bakefile_dir=$bake_result
+        bakefile=$bakefile_dir/Bakefile
+    fi
 
     if [ -f $bakefile ]; then
+        source $bakefile
         if [ "_$1" == "_" ]; then
             task_list $bakefile
         else
-            source $bakefile
-
             # ensure working directory is from Bakefile
             pushd $bakefile_dir >/dev/null
-
             if [[ $(type -t $1) == "function" ]]; then
                 "$@"
             elif [[ $(type -t on_command_not_found) == "function" ]]; then
@@ -229,6 +240,85 @@ main() {
     fi
 }
 
+# Creates a `Bakefile` in current directory.
+create_bakefile() {
+    [ -f ./Bakefile ] && return 1
+    echo "#!/bin/bash
+
+function build {                    # Builds the project
+    echo sample build task
+}
+" > Bakefile
+    return 0
+}
+
+# Initializes the local directory with the `bake` script and sample `Bakefile`
+local_init() {
+    cp $0 .
+    create_bakefile
+    echo -e Bake copied locally. Run ${C_CYAN}./bake${C_OFF} to see it in action.
+}
+
+scriptdir() {
+    local  __resultvar=$2
+    local __real
+
+    if [ -h $1 ]; then
+        __real=$(dirname `readlink "$1"`)
+    else
+        __real=$(dirname "$1")
+    fi
+    # Symlinks are sometimes relative, so first move to where file is
+    # then cd into real path
+    eval $__resultvar="$(cd `dirname "$1"` && cd -P "$__real" && pwd )"
+}
 
 
-main $@
+bake_app=`basename $0`
+case "$1" in
+    --install)
+        if test -f /usr/local/bin/bake; then
+            read -p 'A bake script already exists in /usr/local/bin.  Overwrite? (y/N)'
+            test "$REPLY" == "y" || exit
+        fi
+
+        sudo ln -sf $PWD/bake /usr/local/bin
+        ;;
+
+    --init)
+        create_bakefile && echo -e Bakefile created. Run ${C_CYAN}bake${C_OFF} to see it in action.
+        ;;
+
+    --init-local)
+        local_init
+        ;;
+
+    *)
+        if test "$1" == ""; then
+            main $@
+        elif test -f $1; then
+            # allow scripts to be run by bake through #!
+            # setting the bake_app displays usage with the script name instead of `bake`
+            bake_app=`basename $1`
+            bakefile=$1
+            bakefile_dir=$PWD
+            shift
+            main $@
+        elif test -d $1; then
+            if test -f $1/Bakefile; then
+                # allow scripts to be run by bake through #!
+                # setting the bake_app displays usage with the script name instead of `bake`
+                bake_app=bake
+                bakefile=$1/Bakefile
+                bakefile_dir=$1
+                shift
+                main $@
+            else
+                main $@
+            fi
+        else
+            main $@
+        fi
+        ;;
+esac
+
