@@ -1,3 +1,4 @@
+[![build status](https://secure.travis-ci.org/mgutz/bake.png)](http://travis-ci.org/mgutz/bake)
 # Bake
 
 Simple Bash build/project utility in the style of rake.
