@@ -112,8 +112,8 @@ task_list () {
 
         # search for task name in this format "function task_name" or
         # "task_name ()"
-        if (!($func =~ s/^.*function (\w+).*$/\1/)) {
-            $func =~ s/^(\w+).*\(\).*$/\1/;
+        if (!($func =~ s/^.*function ([\w-]+).*$/\1/)) {
+            $func =~ s/^([\w-]+).*\(\).*$/\1/;
         }
         chomp($func);
         printf "%-16s $desc\n", $func;
@@ -321,4 +321,3 @@ case "$1" in
         fi
         ;;
 esac
-
