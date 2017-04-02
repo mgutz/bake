@@ -100,8 +100,7 @@ upsearch () {
 #   task() { }
 #
 # @param $1 Bakefile
-task_list () {
-
+task-list () {
     # awk on OS X does not have gensub so using Perl which is installed
     # almost everywhere
     read -r -d '' task_script <<'SCRIPT'
@@ -112,22 +111,22 @@ task_list () {
 
         # search for task name in this format "function task_name" or
         # "task_name ()"
-        if (!($func =~ s/^.*function (\w+).*$/\1/)) {
-            $func =~ s/^(\w+).*\(\).*$/\1/;
+        if (!($func =~ s/^.*function ([\w\-]+).*$/\1/)) {
+            $func =~ s/^([\w\-]+).*\(\).*$/\1/;
         }
         chomp($func);
         printf "%-16s $desc\n", $func;
     }
 SCRIPT
     perl -ne "$task_script" $1 | sort
-    [[ $(type -t on_task_list) == "function" ]] && on_task_list
+    [[ $(type -t on-task-list) == "function" ]] && on-task-list
 }
 
 
 # Invokes function once.
 #
 # @param $1 Function to invoke.
-invoke () {
+bake-invoke () {
     local invoked
     for f in "$@"; do
         eval "invoked=\$$1_invoked"
@@ -141,11 +140,11 @@ invoke () {
 # Prints a log message with no color.
 #
 # @example
-#   bake_log "coffeescript" "compiling" "src/foo/test.coffee"
+#   bake-log "coffeescript" "compiling" "src/foo/test.coffee"
 #
 # @param $1 Action
 # @param $2 Description
-bake_log () {
+bake-log () {
     echo -e "      $1\t${2}"
 }
 
@@ -154,7 +153,7 @@ bake_log () {
 #
 # @param $1 action
 # @param $2 description
-bake_error () {
+bake-error () {
     echo -e "${C_RED}ERROR $1\t${C_IRED}${2}${C_OFF}"
 }
 
@@ -163,7 +162,7 @@ bake_error () {
 #
 # @param $1 action
 # @param $2 description
-bake_info () {
+bake-info () {
     echo -e "${C_CYAN}      $1\t${C_ICYAN}${2}${C_OFF}"
 }
 
@@ -172,7 +171,7 @@ bake_info () {
 #
 # @param $1 action
 # @param $2 description
-bake_ok () {
+bake-ok () {
     echo -e "${C_GREEN}   OK ${C_IGREEN}$1\t${2}${C_OFF}"
 }
 
@@ -181,9 +180,37 @@ bake_ok () {
 #
 # @param $1 Exit code.
 # @param $2 [optional] Message.
-bake_exit() {
+bake-exit() {
     [[ -n $2 ]] && echo $2
     exit $1
+}
+
+
+# source: http://stackoverflow.com/questions/592620/check-if-a-program-exists-from-a-bash-script
+#
+# Finds the path of an executable.
+bake-which () {
+    command -v $1
+}
+
+
+# Determines if executable exists.
+bake-is-command () {
+    bake-which $1 >/dev/null 2>&1
+}
+
+# Renders a heredoc-based template file
+bake-render-template () {
+	(
+	trap 'rm -f $tempfile' EXIT
+	tempfile=$(mktemp $(pwd)/templateXXXXXX)
+
+	echo 'cat <<END_TEMPLATE' > $tempfile
+	cat $1 >> $tempfile
+	echo END_TEMPLATE >> $tempfile
+
+	. $tempfile
+	)
 }
 
 
@@ -192,12 +219,12 @@ bake_exit() {
 # @param $1 target
 # @param $2 reference
 # @returns 0 if outdated, else 1
-outdated() {
+bake-outdated () {
     local target=$1
     local reference=$2
 
     # reference must exist
-    [ ! -e $reference ] && bake_error "outdated" "Reference $2 not found" && return 1
+    [ ! -e $reference ] && bake-error "outdated" "Reference $2 not found" && return 1
 
     # outdated if target does not exist
     [ ! -e $target ] && return 0
@@ -210,7 +237,7 @@ outdated() {
 
 
 # Main entry point into program.
-main() {
+main () {
     if [ "$bakefile" == "" ]; then
         upsearch Bakefile
         bakefile_dir=$bake_result
@@ -220,17 +247,17 @@ main() {
     if [ -f $bakefile ]; then
         source $bakefile
         if [ "_$1" == "_" ]; then
-            task_list $bakefile
+            task-list $bakefile
         else
             # ensure working directory is from Bakefile
             pushd $bakefile_dir >/dev/null
             if [[ $(type -t $1) == "function" ]]; then
                 "$@"
-            elif [[ $(type -t on_task_not_found) == "function" ]]; then
-                on_task_not_found $@
-                [[ $? -eq 1 ]] && task_list $bakefile
+            elif [[ $(type -t on-task-not-found) == "function" ]]; then
+                on-task-not-found "$@"
+                [[ $? -eq 1 ]] && task-list $bakefile
             else
-                task_list $bakefile
+                task-list $bakefile
             fi
             popd > /dev/null
         fi
@@ -241,7 +268,7 @@ main() {
 }
 
 # Creates a `Bakefile` in current directory.
-create_bakefile() {
+create-bakefile () {
     [ -f ./Bakefile ] && return 1
     echo "#!/bin/bash
 
@@ -253,9 +280,9 @@ function build {                    # Builds the project
 }
 
 # Initializes the local directory with the `bake` script and sample `Bakefile`
-local_init() {
+local-init () {
     cp $0 .
-    create_bakefile
+    create-bakefile
     echo -e Bake copied locally. Run ${C_CYAN}./bake${C_OFF} to see it in action.
 }
 
@@ -273,6 +300,38 @@ scriptdir() {
     eval $__resultvar="$(cd `dirname "$1"` && cd -P "$__real" && pwd )"
 }
 
+task-names () {
+	upsearch Bakefile
+	bakefile_dir=$bake_result
+	bakefile=$bakefile_dir/Bakefile
+
+	if [ -f $bakefile ]; then
+		source $bakefile
+
+    # awk on OS X does not have gensub so using Perl which is installed
+    # almost everywhere
+    read -r -d '' task_script <<'SCRIPT'
+    # search for task description
+    if (s/^#\. (\w.*)$/\1/) {
+        $desc = $1;
+        $func = <>;
+
+        # search for task name in this format "function task_name" or
+        # "task_name ()"
+        if (!($func =~ s/^.*function ([\w\-]+).*$/\1/)) {
+            $func =~ s/^([\w\-]+).*\(\).*$/\1/;
+        }
+        chomp($func);
+        printf "%s", $func;
+    }
+SCRIPT
+    perl -ne "$task_script" $1 | sort
+    [[ $(type -t on-task-list) == "function" ]] && on-task-list
+	fi
+}
+
+
+
 
 bake_app=`basename $0`
 case "$1" in
@@ -286,16 +345,20 @@ case "$1" in
         ;;
 
     --init)
-        create_bakefile && echo -e Bakefile created. Run ${C_CYAN}bake${C_OFF} to see it in action.
+        create-bakefile && echo -e Bakefile created. Run ${C_CYAN}bake${C_OFF} to see it in action.
         ;;
 
     --init-local)
-        local_init
+        local-init
         ;;
+
+    --tasks)
+	task-names
+	;;
 
     *)
         if test "$1" == ""; then
-            main $@
+            main "$@"
         elif test -f $1; then
             # allow scripts to be run by bake through #!
             # setting the bake_app displays usage with the script name instead of `bake`
@@ -303,7 +366,7 @@ case "$1" in
             bakefile=$1
             bakefile_dir=$PWD
             shift
-            main $@
+            main "$@"
         elif test -d $1; then
             if test -f $1/Bakefile; then
                 # allow scripts to be run by bake through #!
@@ -312,12 +375,12 @@ case "$1" in
                 bakefile=$1/Bakefile
                 bakefile_dir=$1
                 shift
-                main $@
+                main "$@"
             else
-                main $@
+                main "$@"
             fi
         else
-            main $@
+            main "$@"
         fi
         ;;
 esac

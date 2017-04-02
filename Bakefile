@@ -2,31 +2,29 @@ function private {
     echo in private
 }
 
-
 #. Builds the project
 function build {
     # ensures clean is called only once
-    invoke clean
-    bake_ok building ...
+    bake-invoke "clean"
+    bake-ok building ...
+    # clean will not run again
+    bake-invoke "clean"
 }
-
 
 #. Cleans the project
 function clean {
-    bake_ok "cleaning ..."
+    bake-ok "cleaning ..."
     private
 }
 
-
-#. Compiles coffee scripts
-function coffee {
-    outdated build src || return 0
-    coffee -c -o build src
-    bake_ok "coffe" "compiled"
+#. Renders hello-template.sh
+function render-template {
+    bake-ok "compiling template ..."
+    bake-render-template hello-template.sh | cat
+    bake-ok "coffe" "compiled"
 }
 
-
-function on_task_not_found {
+function on-task-not-found {
     echo "Task not found $1"
 }
 

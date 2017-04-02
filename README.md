@@ -24,39 +24,37 @@ Run task
 
 ## Example Bakefile
 
-    PATH=node_modules/coffee-script/bin:$PATH
+```sh
+function private {
+    echo in private
+}
 
-    function private {
-        echo in private
-    }
+#. Builds the project
+function build {
+    # ensures clean is called only once
+    bake-invoke "clean"
+    bake-ok building ...
+    # clean will not run again
+    bake-invoke "clean"
+}
 
+#. Cleans the project
+function clean {
+    bake-ok "cleaning ..."
+    private
+}
 
-    #. Builds the project
-    function build {
-        # ensures clean is called only once
-        invoke clean
-        bake_ok building ...
-    }
+#. Renders hello-template.sh
+function render-template {
+    bake-ok "compiling template ..."
+    bake-render-template hello-template.sh | cat
+    bake-ok "coffe" "compiled"
+}
 
-
-    #. Cleans the project
-    function clean {
-        bake_ok "cleaning ..."
-        private
-    }
-
-
-    #. Compiles coffee scripts
-    function coffee {
-        outdated build src || return 0
-        coffee -c -o build src
-        bake_ok "coffe" "compiled"
-    }
-
-
-    function on_task_not_found {
-        echo "Task not found $1"
-    }
+function on-task-not-found {
+    echo "Task not found $1"
+}
+```
 
 ## Rules
 
@@ -70,48 +68,53 @@ Run task
 
 Prints a red error message.
 
-    bake_error <action> <description>
+    bake-error <action> <description>
 
-    example: bake_error "compiling" "src/lib/test.coffee"
+    example: bake-error "compiling" "src/lib/test.coffee"
 
 Prints a plain message.
 
-    bake_log <action> <description>
+    bake-log <action> <description>
 
-    example: bake_log "bake" "Processing bakefile..."
+    example: bake-log "bake" "Processing bakefile..."
 
 Prints a green ok message.
 
-    bake_ok <action> <descsription>
+    bake-ok <action> <description>
 
-    example: bake_ok "compiling" "compiled src/lib/test.js"
+    example: bake-ok "compiling" "compiled src/lib/test.js"
 
 Prints a cyan info message.
 
-    bake_info <action> <description>
+    bake-info <action> <description>
 
-    example: bake_info "bake" "built project in 700ms"
+    example: bake-info "bake" "built project in 700ms"
 
 Invokes a task only once.
 
-    invoke <function_name>
+    bake-invoke <function_name>
 
-    example: invoke "clean"
+    example: bake-invoke "clean"
 
 Determines if target is older than reference, returning 1 if outdated.
 
-    outdated <target> <reference>
+    bake-outdated <target> <reference>
 
     examples:
 
-    outdated build src || return 1          # skip rest of task
+    bake-outdated build src || return 1      # skip rest of task
     outdated build src && invoke "compile"  # compile if outdated
 
+Renders a heredoc file template
+
+    bake-render-template template.sh > newfile.txt
 
 Run a dynamic task when task `$1` is not found. For example, to run
 a test as the first argument to `bake`, add this to `Bakefile`
 
-    function on_task_not_found {
-        [[ -f test/$1.js ]] && mocha test/$1.js && return 0
-        return 1
-    }
+```sh
+function on-task-not-found {
+    [[ -f test/$1.js ]] && mocha test/$1.js && return 0
+    return 1
+}
+```
