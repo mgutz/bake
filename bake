@@ -1,6 +1,9 @@
 #!/bin/bash
 
+version=1.0.1
+
 # Credit: https://wiki.archlinux.org/index.php/Color_Bash_Prompt
+
 
 # Reset
 C_OFF='\033[0m'             # Text Reset
@@ -101,25 +104,88 @@ upsearch () {
 #
 # @param $1 Bakefile
 task-list () {
-    # awk on OS X does not have gensub so using Perl which is installed
-    # almost everywhere
-    read -r -d '' task_script <<'SCRIPT'
-    # search for task description
-    if (s/^#\. (\w.*)$/\1/) {
-        $desc = $1;
-        $func = <>;
+	[[ $(type -t on-task-list) == "function" ]] && { on-task-list "$@"; return; }
 
-        # search for task name in this format "function task_name" or
-        # "task_name ()"
-        if (!($func =~ s/^.*function ([\w\-]+).*$/\1/)) {
-            $func =~ s/^([\w\-]+).*\(\).*$/\1/;
-        }
-        chomp($func);
-        printf "%-16s $desc\n", $func;
-    }
-SCRIPT
-    perl -ne "$task_script" $1 | sort
-    [[ $(type -t on-task-list) == "function" ]] && on-task-list
+	local bakefile="$1"
+	test -z "$bakefile" && return
+	while read line; do
+		# exported function follows any comment that starts with '.'
+		re_export='^#\. (.*)'
+		if [[ "$line" =~ $re_export ]]; then
+			check_next=true
+			comments+=("${BASH_REMATCH[1]}")
+		elif [ "$check_next" = true ]; then
+			# function foo
+			re_func='^function ([0-9a-zA-Z_\-]+)'
+			# anonymous function eg 'foo()' or 'foo ()'
+			re_anon='^([a-zA-Z_][0-9a-zA-Z_\-]+) ?\('
+			if [[ "$line" =~ $re_func ]]; then
+				tasks+=("${BASH_REMATCH[1]}")
+			elif [[ "$line" =~ $re_anon ]]; then
+				tasks+=("${BASH_REMATCH[1]}")
+			fi
+			check_next=false
+		fi
+	done < "$bakefile";
+
+	# find longest task
+	longest=0
+	for c in "${tasks[@]}"; do
+		# char length of task
+		L=${#c}
+		if (( L > longest )); then
+			longest=$L
+		fi
+	done
+
+	# length of tasks
+	L=${#tasks[@]}
+	# iterate over tasks and comments to build list
+	for (( i=0; i<${L}; i++ )); do
+	  printf -v item "%-${longest}s  %s" "${tasks[i]}" "${comments[i]}"
+	  list+=("$item")
+	done
+
+	usage
+	# print sorted list
+	printf '%s\n' "${list[@]}" | sort
+
+}
+
+
+usage () {
+	echo bake v$version
+	echo
+}
+
+
+bake-task-names () {
+	upsearch Bakefile
+	test -z $bake_result && return
+	local bakefile_dir=$bake_result
+	local bakefile=$bakefile_dir/Bakefile
+	local check_next=false
+	local tasks=()
+
+	while read line; do
+		# exported function follows any comment that starts with '.'
+		re_export='^#\.'
+		if [[ "$line" =~ $re_export ]]; then
+			check_next=true
+		elif [ $check_next = true ]; then
+			# function foo
+			re_func='^function ([0-9a-zA-Z_\-]*)'
+			# anonymous function eg 'foo()' or 'foo ()'
+			re_anon='^([a-zA-Z_][0-9a-zA-Z_\-]*) ?\('
+			if [[ "$line" =~ $re_func ]]; then
+				tasks+=(${BASH_REMATCH[1]})
+			elif [[ "$line" =~ $re_anon ]]; then
+				tasks+=(${BASH_REMATCH[1]})
+			fi
+			check_next=false
+		fi
+	done < "$bakefile";
+	echo "${tasks[*]}"
 }
 
 
@@ -300,39 +366,6 @@ scriptdir() {
     eval $__resultvar="$(cd `dirname "$1"` && cd -P "$__real" && pwd )"
 }
 
-task-names () {
-	upsearch Bakefile
-	bakefile_dir=$bake_result
-	bakefile=$bakefile_dir/Bakefile
-
-	if [ -f $bakefile ]; then
-		source $bakefile
-
-    # awk on OS X does not have gensub so using Perl which is installed
-    # almost everywhere
-    read -r -d '' task_script <<'SCRIPT'
-    # search for task description
-    if (s/^#\. (\w.*)$/\1/) {
-        $desc = $1;
-        $func = <>;
-
-        # search for task name in this format "function task_name" or
-        # "task_name ()"
-        if (!($func =~ s/^.*function ([\w\-]+).*$/\1/)) {
-            $func =~ s/^([\w\-]+).*\(\).*$/\1/;
-        }
-        chomp($func);
-        printf "%s", $func;
-    }
-SCRIPT
-    perl -ne "$task_script" $1 | sort
-    [[ $(type -t on-task-list) == "function" ]] && on-task-list
-	fi
-}
-
-
-
-
 bake_app=`basename $0`
 case "$1" in
     --install)
@@ -353,7 +386,7 @@ case "$1" in
         ;;
 
     --tasks)
-	task-names
+	bake-task-names
 	;;
 
     *)
