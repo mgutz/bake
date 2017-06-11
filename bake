@@ -116,9 +116,9 @@ task-list () {
 			comments+=("${BASH_REMATCH[1]}")
 		elif [ "$check_next" = true ]; then
 			# function foo
-			re_func='^function ([0-9a-zA-Z_\-]+)'
+			re_func='^function +([0-9a-zA-Z_\-]+)'
 			# anonymous function eg 'foo()' or 'foo ()'
-			re_anon='^([a-zA-Z_][0-9a-zA-Z_\-]+) ?\('
+			re_anon='^([a-zA-Z_][0-9a-zA-Z_\-]+) *\('
 			if [[ "$line" =~ $re_func ]]; then
 				tasks+=("${BASH_REMATCH[1]}")
 			elif [[ "$line" =~ $re_anon ]]; then
@@ -174,9 +174,9 @@ bake-task-names () {
 			check_next=true
 		elif [ $check_next = true ]; then
 			# function foo
-			re_func='^function ([0-9a-zA-Z_\-]*)'
+			re_func='^function +([0-9a-zA-Z_\-]*)'
 			# anonymous function eg 'foo()' or 'foo ()'
-			re_anon='^([a-zA-Z_][0-9a-zA-Z_\-]*) ?\('
+			re_anon='^([a-zA-Z_][0-9a-zA-Z_\-]*) *\('
 			if [[ "$line" =~ $re_func ]]; then
 				tasks+=(${BASH_REMATCH[1]})
 			elif [[ "$line" =~ $re_anon ]]; then
