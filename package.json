@@ -2,7 +2,7 @@
   "author": "Mario Gutierrez <mario@mgutz.com>",
   "name": "bake-bash",
   "description": "Simple bash make utility",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "repository": {
     "url": "http://github.com/mgutz/bake"
   },
