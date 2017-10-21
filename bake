@@ -301,6 +301,14 @@ bake-outdated () {
     return 1
 }
 
+# Read .env file
+bake-read-env () {
+    local file=${1:-.env}
+    set -o allexport
+    source $file
+    set +o allexport
+}
+
 
 # Main entry point into program.
 main () {
